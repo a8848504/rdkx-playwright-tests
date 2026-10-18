@@ -1,0 +1,23 @@
+# Scratch scripts, download caches, local logs and intermediate inspection images
+/work/
+
+# Local credentials and authenticated browser state
+**/login.local.json
+**/.auth/
+**/.env
+**/.env.*
+!**/.env.example
+
+# Reinstallable dependencies and browsers
+**/node_modules/
+**/.browsers/
+
+# Test execution artifacts may include internal business information
+**/test-results/
+**/playwright-report/
+**/screenshots/
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+*.log

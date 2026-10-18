@@ -1,0 +1,7 @@
+// 复制到 tests/business/新用例.spec.js，再修改业务步骤。无需填写登录代码。
+const { test, expect } = require('../../support/app-test');
+
+test('这里填写业务用例名称', async ({ page }) => {
+  // page 已在登录后的设备分析首页；接着执行新的业务操作。
+  await expect(page.getByText('主菜单', { exact: true })).toBeVisible();
+});

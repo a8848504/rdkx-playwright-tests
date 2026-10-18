@@ -1,0 +1,122 @@
+Playwright 本机环境
+==================
+版本：1.64.1；Node.js：22.22.2。
+
+双击入口：
+Start-UI.cmd       打开本机测试界面，在左侧选择测试后点击运行。
+Run-Tests.cmd      在 Chromium、Firefox、WebKit 上运行示例测试。
+Record-Browser.cmd 打开 Chromium 和 Playwright Inspector，录制浏览器操作。
+View-Report.cmd    查看最近一次测试报告及截图。
+
+Playwright 是网页自动化和测试工具。录制器会生成代码，需保存为脚本或测试文件后才能复用。
+启动的浏览器使用独立配置，不自动继承你平时浏览器的登录状态。
+浏览器组件保存在本目录的 .browsers；无需更改系统浏览器或系统代理。
+
+PowerShell 用法（先切换到本目录）：
+npm.cmd test
+npm.cmd run ui
+npm.cmd run test:headed
+npm.cmd run screenshot -- https://example.com
+
+测试代码：tests/smoke.spec.js
+浏览器设置：playwright.config.js
+截图脚本：scripts/screenshot.cjs
+本地演示页面：demo.html
+测试报告：playwright-report/index.html
+测试结果及每个浏览器截图：test-results/
+
+在其他项目中使用 Playwright，需要在那个项目单独安装依赖。
+本次按官方 npm 发行包部署运行环境，并非 Playwright 框架源码开发环境。
+官方安装文档：https://playwright.dev/docs/intro
+项目地址：https://github.com/microsoft/playwright
+
+机泵系统：公共登录与业务用例
+--------------------------
+推荐双击 Run-Business.cmd：显示浏览器，公共登录一次后运行全部业务用例。
+Run-Departments.cmd：公共登录一次，再运行部门新增、编辑、删除流程。
+Run-Roles.cmd：公共登录一次，再运行角色新增、修改、删除流程。
+Run-Positions.cmd：职位管理；Run-Permissions.cmd：权限管理；Run-Users.cmd：用户管理。
+Run-New-Management.cmd：只登录一次，连续运行本次新增的三个管理用例。
+Run-Login.cmd：只运行公共登录准备，用于手动刷新登录状态。
+
+命令行：
+npm.cmd run test:business    公共登录 -> 所有业务用例
+npm.cmd run test:department  公共登录 -> 部门管理
+npm.cmd run test:role        公共登录 -> 角色管理
+npm.cmd run test:position    公共登录 -> 职位管理
+npm.cmd run test:permission  公共登录 -> 权限管理
+npm.cmd run test:user        公共登录 -> 用户管理
+npm.cmd run test:new-management  公共登录 -> 三个新增管理用例
+npm.cmd run test:login       只执行公共登录准备
+
+执行关系：
+1. auth 项目的公共前置先登录一次，保存当前会话。
+2. rdkx 项目的所有业务用例依赖 auth，直接复用该会话。
+3. 业务用例使用独立页面和浏览器上下文；同一账户的业务用例逐个运行。
+4. 每次命令行运行会重新登录一次；不会为每个业务用例重复输入密码。
+5. 部门用例内部按“新增 -> 刷新核对 -> 编辑 -> 刷新核对 -> 删除 -> 刷新核对”的顺序执行。
+6. 各业务用例应独立；文件间若存在业务前后置关系，需要另外声明，不能依赖名称或偶然的执行顺序。
+
+UI 模式：
+Playwright UI 默认不会自动运行 auth 依赖项目。
+首次使用或登录过期时，在项目筛选中启用 auth，先点击 auth.setup.js 的运行按钮。
+随后选 rdkx 项目，运行其中任意业务用例；后续操作会复用保存的会话。
+
+新增用例：
+复制 templates/business.spec.js.example 到 tests/business/新用例.spec.js。
+保留 const { test, expect } = require('../../support/app-test');
+page 会自动进入已登录的设备分析首页，直接编写业务步骤即可。
+不要在新用例中再次填写账号密码或点击登录。
+
+当前文件：
+tests/setup/auth.setup.js             公共登录准备
+support/app-test.js                   公共业务页面，自动恢复会话并打开首页
+support/app-config.js                 站点地址和本机账号配置读取
+tests/business/departments.spec.js    部门新增、编辑、删除
+tests/business/roles.spec.js          角色新增、修改、删除
+tests/business/positions.spec.js      职位新增、修改、删除
+tests/business/permissions.spec.js    菜单权限新增、修改、删除
+tests/business/users.spec.js          用户及关联测试记录新增、修改、删除
+support/management.js                三个新增用例共用的列表、表单与清理操作
+tests/business/session-reuse.spec.js  独立页面会话复用验证
+templates/business.spec.js.example   新业务用例模板
+
+部门测试名称采用 PW测 + 随机标识，编辑后采用 PW改 + 相同标识。
+每次运行只操作本次名称，中途失败会截图并尝试清理本次创建的记录。
+新增、编辑、删除各保存一张截图，报告中附带部门名称及删除验证结果。
+
+本机账号配置：login.local.json；会话文件：.auth/（二者都已加入 .gitignore，不应分享或提交）。
+支持 RDKX_LOGIN_URL、RDKX_USERNAME、RDKX_PASSWORD 环境变量覆盖本机账号配置。
+auth 和 rdkx 项目都不生成操作追踪或录像，不勾选网站的“记住密码”。
+查看报告：双击 View-Report.cmd；或执行 npm.cmd run report。
+截图：test-results/ 中部门用例目录的 01-department-created.png、02-department-edited.png、03-department-deleted.png。
+官方说明：https://playwright.dev/docs/auth
+
+
+角色管理用例
+------------
+运行：双击 Run-Roles.cmd（显示浏览器），或执行 npm.cmd run test:role。
+Run-Business.cmd 自动包含此用例，与其他业务用例共享一轮公共登录。
+
+步骤：主菜单 -> 组织架构 -> 角色管理 -> 新增唯一测试角色 -> 刷新后搜索并核对启用状态 -> 编辑名称并选择停用 -> 刷新后核对旧名称消失、新名称存在 -> 重新打开编辑弹窗，核对名称和停用状态已保存 -> 取消关闭弹窗 -> 删除本次角色 -> 刷新后搜索原名称及新名称，确认均不存在。
+
+角色名称：PWR测 + 随机标识；修改后：PWR改 + 相同标识。
+通过搜索定位记录，避免角色列表分页导致漏查。
+只操作本次创建的角色；失败时保存截图并尝试清理本次记录。
+用例文件：tests/business/roles.spec.js。
+截图：test-results/ 中角色用例目录的 01-role-created.png、02-role-edited.png、03-role-deleted.png。
+
+
+新增的职位、权限、用户用例
+------------------------
+双击 Run-New-Management.cmd 会显示浏览器，公共登录一次后连续运行这三个新用例。
+Run-Business.cmd 也已自动包含这三个用例。
+
+职位管理：新增唯一职位并填写说明；刷新搜索验证；编辑名称和说明；刷新核对；删除后再次搜索确认消失。
+权限管理：新增仅 root 可见的空测试菜单；刷新核对；修改名称；刷新并重新打开编辑确认名称及开放类型；删除后确认节点不存在。菜单不绑定业务 URL、权限 key 或路由文件，也不分配给业务角色。
+用户管理：先创建本轮专用部门、职位及空权限角色；选择专用部门后新增临时用户；刷新验证账号、姓名和关联资料；修改姓名、性别及在职状态；刷新核对；删除临时用户；最后删除本轮角色、职位、部门并验证清理结果。
+
+临时用户密码每次随机生成，满足大写、小写、数字、特殊字符及 8-12 位的实际校验，不写入说明、截图、会话配置或测试报告。
+用户用例不填写邮箱、电话，不发短信、邮件，不重置现有用户密码。
+三个用例使用独立的随机名称，中途失败时保存截图并尝试清理本次测试记录。
+每个用例都保存新增、修改、删除三个阶段截图；用户用例另有 JSON 清理结果附件。

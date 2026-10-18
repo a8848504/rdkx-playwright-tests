@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>Playwright 本机测试</title>
+<style>
+body { font: 18px/1.7 'Segoe UI', 'Microsoft YaHei', sans-serif; background: #f4f7fb; color: #183044; margin: 70px auto; max-width: 760px; padding: 30px; }
+main { background: white; padding: 36px; border-radius: 18px; box-shadow: 0 10px 40px #17354e12; }
+h1 { font-size: 32px; margin-top: 0; } input[type=text] { width: 70%; font: inherit; padding: 10px; border: 1px solid #a7b8c6; border-radius: 8px; }
+button { font: inherit; background: #197947; color: white; padding: 11px 22px; border: 0; border-radius: 8px; cursor: pointer; }
+label { display: block; margin: 18px 0 8px; } [role=status] { color: #197947; font-weight: 600; }
+</style>
+<main>
+<h1>Playwright 本机测试</h1>
+<p>自动化测试将输入文字、添加任务、勾选完成并保存截图。</p>
+<form id="form"><label for="task">测试内容</label><input id="task" type="text" required> <button>添加</button></form>
+<ul id="tasks"></ul>
+<label><input type="checkbox" id="done"> 标记完成</label>
+<p role="status">等待测试</p>
+</main>
+<script>
+document.querySelector('#form').addEventListener('submit', e => {
+  e.preventDefault();
+  const item = document.createElement('li');
+  item.textContent = document.querySelector('#task').value;
+  document.querySelector('#tasks').append(item);
+  document.querySelector('#task').value = '';
+});
+document.querySelector('#done').addEventListener('change', e => {
+  document.querySelector('[role=status]').textContent = e.target.checked ? '测试成功：任务已完成' : '等待测试';
+});
+</script>
+</html>

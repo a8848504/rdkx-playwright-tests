@@ -1,0 +1,22 @@
+{
+  "name": "local-playwright",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local Playwright automation and browser tests",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed --workers=1",
+    "test:login": "playwright test --project=auth --workers=1",
+    "test:department": "playwright test tests/business/departments.spec.js --project=rdkx --workers=1",
+    "test:role": "playwright test tests/business/roles.spec.js --project=rdkx --workers=1",
+    "test:position": "playwright test tests/business/positions.spec.js --project=rdkx --workers=1",
+    "test:permission": "playwright test tests/business/permissions.spec.js --project=rdkx --workers=1",
+    "test:user": "playwright test tests/business/users.spec.js --project=rdkx --workers=1",
+    "test:new-management": "playwright test tests/business/positions.spec.js tests/business/permissions.spec.js tests/business/users.spec.js --project=rdkx --workers=1",
+    "test:business": "playwright test --project=rdkx --workers=1",
+    "ui": "playwright test --ui --ui-host=127.0.0.1 --ui-port=9323",
+    "report": "playwright show-report --host=127.0.0.1",
+    "screenshot": "node scripts/screenshot.cjs"
+  },
+  "devDependencies": { "@playwright/test": "1.64.1" }
+}
